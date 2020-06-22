@@ -8,10 +8,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class ArgumentParser {
 
   private static final String LONG_OPTION_PREFIX = "--";
   private static final String SHORT_OPTION_PREFIX = "-";
+
+  private static Class<?> lastProcessedClass;
+
+  public static void printHelp() {
+    System.out.println(HelpTextGenerator.generateHelpText(lastProcessedClass));
+  }
+
+  public static void printHelp(Class<?> argClass) {
+    System.out.println(HelpTextGenerator.generateHelpText(argClass));
+  }
 
   /**
    * Parse the arguments.
@@ -22,6 +33,7 @@ public class ArgumentParser {
    * @return The object containing the parsed arguments
    */
   public static <T> T parse(Class<T> argClass, String[] args) {
+    lastProcessedClass = argClass;
     try {
       T obj = argClass.getConstructor().newInstance();
       if (args == null || args.length == 0) {
@@ -39,10 +51,12 @@ public class ArgumentParser {
         } else if (field.isAnnotationPresent(Parameter.class)) {
           Parameter parameter = field.getAnnotation(Parameter.class);
           parameterFieldMap.put(parameter, field);
+          // TODO Add validation on whether the parameter positions are unique and incremented by 1.
           maxParameters = Math.max(parameter.position(), maxParameters);
         }
       }
 
+      // TODO Add support for mutual exclusions.
       String arg;
       String argValue;
       int paramCount = 0;

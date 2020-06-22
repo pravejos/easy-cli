@@ -9,12 +9,17 @@
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
+    id 'maven-publish'
+    id 'signing'
 }
 
+group = "com.github.pravejos"
+archivesBaseName = "easy-cli"
+version = "0.1.0-SNAPSHOT"
+
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -28,4 +33,82 @@ dependencies {
 test {
     // Use junit platform for unit tests
     useJUnitPlatform()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
+
+File secretPropsFile = project.rootProject.file('maven.properties')
+if (secretPropsFile.exists()) {
+    println "Found secret props file, loading props"
+    Properties p = new Properties()
+    p.load(new FileInputStream(secretPropsFile))
+    p.each { name, value ->
+        ext[name] = value
+    }
+} else {
+    println "No maven.properties file, loading env vars"
+    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
+    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+    ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+    ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "MavenCentral"
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+    publications {
+        release(MavenPublication) {
+            from(components["java"])
+//            artifact(tasks["sourcesJar"])
+//            artifact(tasks["javadocJar"])
+
+            pom {
+                name.set("easy-cli")
+                description.set("Java library for easy command line argument parsing")
+                url.set("https://github.com/pravejos/easy-cli")
+                licenses {
+                    license {
+                        name.set("MIT")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("pravejos")
+                        name.set("Praveen Joseph")
+                        email.set("mail.praveenjoseph@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/pravejos/easy-cli.git")
+                    developerConnection.set("scm:git:https://github.com/pravejos/easy-cli.git")
+                    url.set("https://github.com/pravejos/easy-cli")
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
 }
