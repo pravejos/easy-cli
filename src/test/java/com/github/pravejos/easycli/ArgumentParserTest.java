@@ -24,4 +24,26 @@ class ArgumentParserTest {
     assertEquals("changed2", testOption.getString2());
     assertEquals(11, testOption.getIntParamWithDefault());
   }
+
+  @Test
+  void testPrintHelp() {
+    // ARRANGE
+    String expected =
+        "Usage: java [JavaOptions] <mainclass> [OPTIONS] [PARAMETERS]\n"
+            + "   or  java [JavaOptions] -jar <jarfile> [OPTIONS] [PARAMETERS]\n"
+            + "\n"
+            + "Options:\n"
+            + "  -l, --myLong  This is a test Long option (default \"100\")\n"
+            + "  -s, --myString This is a test String option (default \"dummy\")\n"
+            + "      --myString2 This is a test String option 2 (default \"dummy2\")\n"
+            + "\n"
+            + "Parameters:\n"
+            + "  Param1 (Mandatory) This is a test Int parameter (default \"10\")\n";
+
+    // ACT
+    String help = HelpTextGenerator.generateHelpText(TestOption.class);
+
+    // ASSERT
+    assertEquals(expected, help);
+  }
 }
