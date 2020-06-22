@@ -15,7 +15,7 @@ plugins {
 
 group = "com.github.pravejos"
 archivesBaseName = "easy-cli"
-version = "0.1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     jcenter()
