@@ -1,4 +1,3 @@
-[![Examples](https://img.shields.io/badge/demo-here-blue.svg)](https://github.com/pravejos/easy-cli/blob/master/src/test/java/com/github/pravejos/easycli/TestOption.java)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.pravejos/easy-cli.svg)](https://search.maven.org/artifact/com.github.pravejos/easy-cli)
 [![GitHub license](https://img.shields.io/github/license/pravejos/easy-cli.svg)](https://github.com/pravejos/easy-cli/blob/master/LICENSE)
 
