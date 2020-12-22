@@ -36,7 +36,7 @@ public class ArgumentParser {
     lastProcessedClass = argClass;
     try {
       T obj = argClass.getConstructor().newInstance();
-      if (args == null || args.length == 0) {
+      if (args == null) {
         return obj;
       }
 
@@ -58,39 +58,59 @@ public class ArgumentParser {
 
       // TODO Add support for mutual exclusions.
       String arg;
-      String argValue;
+      String argValue = null;
       int paramCount = 0;
       for (int i = 0; i < args.length; i++) {
         arg = args[i];
         if (arg.startsWith(LONG_OPTION_PREFIX)) {
-          String optionStr = arg.substring(2);
-          assertTrue(
-              i + 1 < args.length,
-              "Argument parsing failed. Missing value for argument - " + optionStr);
+          String optionStr;
+          if (arg.contains("=")) {
+            int indexEquals = arg.indexOf('=');
+            argValue = arg.substring(indexEquals + 1);
+            optionStr = arg.substring(2, indexEquals);
+          } else {
+            optionStr = arg.substring(2);
+          }
+
           Map.Entry<Option, Field> optionFieldEntry =
-              optionFieldMap.entrySet().stream()
-                  .filter(e -> e.getKey().longName().equals(optionStr))
-                  .findFirst()
-                  .orElseThrow(() -> new ArgumentParserException("Invalid option - " + optionStr));
+                  optionFieldMap.entrySet().stream()
+                          .filter(e -> e.getKey().longName().equals(optionStr))
+                          .findFirst()
+                          .orElseThrow(() -> new ArgumentParserException("Invalid option - " + optionStr));
           Field field = optionFieldEntry.getValue();
           if (field.getType().isAssignableFrom(Boolean.TYPE)) {
             field.setBoolean(obj, true);
           } else {
-            argValue = args[++i];
+            if (!arg.contains("=")) {
+              assertTrue(
+                      i + 1 < args.length,
+                      "Argument parsing failed. Missing value for argument - " + optionStr);
+              argValue = args[++i];
+            }
             setFieldValue(obj, field, argValue);
           }
           optionFieldMap.remove(optionFieldEntry.getKey());
         } else if (arg.startsWith(SHORT_OPTION_PREFIX)) {
-          String optionStr = arg.substring(1);
+          String optionStr;
+          if (arg.contains("=")) {
+            int indexEquals = arg.indexOf('=');
+            argValue = arg.substring(indexEquals + 1);
+            optionStr = arg.substring(1, indexEquals);
+            assertTrue(
+                    (optionStr.length() == 1),
+                    "'" + optionStr + "' cannot be combined with '='. Split them into individual options");
+          } else {
+            optionStr = arg.substring(1);
+          }
           boolean isSingleShortOption = (optionStr.length() == 1);
           for (int j = 0; j < optionStr.length(); j++) {
             char option = optionStr.charAt(j);
             Map.Entry<Option, Field> optionFieldEntry =
-                optionFieldMap.entrySet().stream()
-                    .filter(e -> e.getKey().shortName() == option)
-                    .findFirst()
-                    .orElseThrow(
-                        () -> new ArgumentParserException("Invalid option - " + optionStr));
+                    optionFieldMap.entrySet().stream()
+                            .filter(e -> e.getKey().shortName() == option)
+                            .findFirst()
+                            .orElseThrow(
+                                    () -> new ArgumentParserException("Invalid option - " + optionStr));
             Field field = optionFieldEntry.getValue();
             assertTrue(
                 isSingleShortOption || field.getType().isAssignableFrom(Boolean.TYPE),
@@ -98,7 +118,12 @@ public class ArgumentParser {
             if (field.getType().isAssignableFrom(Boolean.TYPE)) {
               field.setBoolean(obj, true);
             } else {
-              argValue = args[++i];
+              if (!arg.contains("=")) {
+                assertTrue(
+                        i + 1 < args.length,
+                        "Argument parsing failed. Missing value for argument - " + optionStr);
+                argValue = args[++i];
+              }
               setFieldValue(obj, field, argValue);
             }
             optionFieldMap.remove(optionFieldEntry.getKey());
