@@ -12,7 +12,7 @@ git clone https://github.com/pravejos/easy-cli.git
 2. Run the application using different options passed in
 * Missing mandatory parameters
 ```shell
-$ java -jar example/build/libs/easy-cli-example-all.jar                                                                                                984ms  Tue 20:18
+$ java -jar example/build/libs/easy-cli-example-all.jar
 Error parsing arguments. Missing required parameter - patterns
 Usage: java [JavaOptions] <mainclass> [OPTIONS] [PARAMETERS]
    or  java [JavaOptions] -jar <jarfile> [OPTIONS] [PARAMETERS]
@@ -34,7 +34,7 @@ Parameters:
 
 * With all valid parameters 
 ```
-$ java -jar example/build/libs/easy-cli-example-all.jar -Ei -e='*.*' --file ./test.txt --fixed-strings=true -m 500 abcd ../temp/ /opt/ .                    156ms  Tue 20:29
+$ java -jar example/build/libs/easy-cli-example-all.jar -Ei -e='*.*' --file ./test.txt --fixed-strings=true -m 500 abcd ../temp/ /opt/ .
 Arguments parsed successfully.
 GrepOption{isExtendedRegExp=true,
 	 isFixedStrings=true,
